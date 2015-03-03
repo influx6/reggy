@@ -1,8 +1,6 @@
 package reggy
 
 import (
-	// "fmt"
-	// "net/url"
 	"regexp"
 	"strings"
 )
@@ -140,21 +138,19 @@ func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) 
 			state = false
 			return state, param
 		}
-	} else {
+	}
 
-		for k, v := range m.Pix {
-			if v.Validate(src[k]) {
-				if v.param {
-					param[v.Original] = src[k]
-				}
-				state = true
-				continue
-			} else {
-				state = false
-				break
+	for k, v := range m.Pix {
+		if v.Validate(src[k]) {
+			if v.param {
+				param[v.Original] = src[k]
 			}
+			state = true
+			continue
+		} else {
+			state = false
+			break
 		}
-
 	}
 
 	return state, param
@@ -170,20 +166,19 @@ func (m *FunctionalMatchMux) Validate(f string, strictlen bool) (bool, MapGeneri
 			state = false
 			return state, param
 		}
-	} else {
-		for k, v := range m.Pix {
-			if v.Validate(src[k]) {
-				if v.param {
-					param[v.Original] = src[k]
-				}
-				state = true
-				continue
-			} else {
-				state = false
-				break
-			}
-		}
+	}
 
+	for k, v := range m.Pix {
+		if v.Validate(src[k]) {
+			if v.param {
+				param[v.Original] = src[k]
+			}
+			state = true
+			continue
+		} else {
+			state = false
+			break
+		}
 	}
 
 	return state, param
