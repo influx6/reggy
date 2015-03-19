@@ -62,57 +62,68 @@ func splitPattern(c string) []string {
 	return strings.Split(c, "/")
 }
 
+//GenerateClassicMatcher returns a *ClassicMatcher based on a pattern part
+func GenerateClassicMatcher(val string) *ClassicMatcher {
+	if paramd.MatchString(val) {
+		part := strings.Split(removeCurly(val), ":")
+		mrk := regexp.MustCompile(removeBracket(part[1]))
+
+		return &ClassicMatcher{
+			mrk,
+			part[0],
+			true,
+		}
+	}
+
+	return &ClassicMatcher{
+		regexp.MustCompile(val),
+		val,
+		false,
+	}
+}
+
+//GenerateFunctionalMatcher returns a FunctionalMatcher
+func GenerateFunctionalMatcher(val string, fn func(data interface{}) bool) *FunctionalMatcher {
+	if fn == nil {
+		return &FunctionalMatcher{
+			func(i interface{}) bool {
+				return i == val
+			},
+			val,
+			false,
+		}
+	}
+
+	return &FunctionalMatcher{
+		fn,
+		val,
+		true,
+	}
+}
+
+//ClassicPattern returns list of ClassicMatcher
 func ClassicPattern(pattern string) []*ClassicMatcher {
 	sr := splitPattern(pattern)
 	ms := make(ClassicList, len(sr))
-	var cl *ClassicMatcher
 	for k, val := range sr {
-		if paramd.MatchString(val) {
-			part := strings.Split(removeCurly(val), ":")
-			mrk := regexp.MustCompile(removeBracket(part[1]))
-
-			cl = &ClassicMatcher{
-				mrk,
-				part[0],
-				true,
-			}
-		} else {
-			cl = &ClassicMatcher{
-				regexp.MustCompile(val),
-				val,
-				false,
-			}
-		}
-
-		ms[k] = cl
+		ms[k] = GenerateClassicMatcher(val)
 	}
-
 	return ms
 }
 
 func MappedPattern(pattern string, f MapFunc) []*FunctionalMatcher {
 	src := splitPattern(pattern)
 	ms := make(FunctionalList, len(src))
-	var cl *FunctionalMatcher
 	for k, val := range src {
 		if fn, ok := f[val]; ok {
-			cl = &FunctionalMatcher{
-				fn,
-				val,
-				true,
+			if ok {
+				ms[k] = GenerateFunctionalMatcher(val, fn)
+			} else {
+				ms[k] = GenerateFunctionalMatcher(val, nil)
 			}
 		} else {
-			vk := src[k]
-			fn := func(i interface{}) bool {
-				return i == vk
-			}
-			cl = &FunctionalMatcher{
-				fn,
-				val,
-				false,
-			}
+			ms[k] = GenerateFunctionalMatcher(val, nil)
 		}
-		ms[k] = cl
 	}
 
 	return ms
