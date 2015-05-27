@@ -62,22 +62,25 @@ func splitPattern(c string) []string {
 	return strings.Split(c, "/")
 }
 
-//GenerateClassicMatcher returns a *ClassicMatcher based on a pattern part
-func GenerateClassicMatcher(val string) *ClassicMatcher {
-	if paramd.MatchString(val) {
-		part := strings.Split(removeCurly(val), ":")
-		mrk := regexp.MustCompile(removeBracket(part[1]))
-
-		return &ClassicMatcher{
-			mrk,
-			part[0],
-			true,
-		}
+//YankSpecial provides a means of extracting parts of form `{id:[\d+]}`
+func YankSpecial(val string) (string, string, bool) {
+	if !paramd.MatchString(val) {
+		return val, val, false
 	}
 
+	part := strings.Split(removeCurly(val), ":")
+	// mrk := removeBracket(part[1])
+	return part[0], removeBracket(part[1]), true
+}
+
+//GenerateClassicMatcher returns a *ClassicMatcher based on a pattern part
+func GenerateClassicMatcher(val string) *ClassicMatcher {
+	id, rx, _ := YankSpecial(val)
+	mrk := regexp.MustCompile(rx)
+
 	return &ClassicMatcher{
-		regexp.MustCompile(val),
-		val,
+		mrk,
+		id,
 		false,
 	}
 }
@@ -111,6 +114,7 @@ func ClassicPattern(pattern string) []*ClassicMatcher {
 	return ms
 }
 
+//MappedPattern returns a list of FunctionalMatcher
 func MappedPattern(pattern string, f MapFunc) []*FunctionalMatcher {
 	src := splitPattern(pattern)
 	ms := make(FunctionalList, len(src))
