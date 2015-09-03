@@ -97,7 +97,7 @@ func CreateFunctional(pattern string, f MapFunc) *FunctionalMatchMux {
 // Validate validates if a string matches the pattern and returns the parameter parts
 func (m *FunctionalMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
 	var state bool
-	src := splitPattern(f)
+	src := splitPattern(cleanPath(f))
 	param := make(MapGeneric)
 
 	if !!strictlen {
@@ -138,7 +138,7 @@ func CreateClassic(pattern string) *ClassicMatchMux {
 // Validate validates if a string matches the pattern and returns the parameter parts
 func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
 	var state bool
-	src := splitPattern(f)
+	src := splitPattern(cleanPath(f))
 	param := make(MapGeneric)
 
 	if !!strictlen {

@@ -21,8 +21,11 @@ func TestSpecialChecker(t *testing.T) {
 	if HasParam(`/admin/id`) {
 		t.Fatal(`/admin/id is not special`)
 	}
-	if HasParam(`/admin/:id`) {
-		t.Fatal(`/admin/id is not special`)
+	if !HasParam(`/admin/:id`) {
+		t.Fatal(`/admin/:id is special`)
+	}
+	if HasKeyParam(`/admin/:id`) {
+		t.Fatal(`/admin/:id is special`)
 	}
 }
 
