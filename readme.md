@@ -1,7 +1,7 @@
 #Reggy
 Reggy is a package for creating simple url pattern matchers using two style and provides validation methods that can extract the special paramters from the uri provided in validation. These two styles are the Classic and Mapped pattern.
 
-##Install 
+##Install
 
      go get github.com/influx6/reggy
 
@@ -38,6 +38,7 @@ These struct encapsulates the classic pattern and provides the pattern and param
     This member function takes the pattern to match against and a bool value to indicate if should be strict on the length of the patterns to be matched.It returns a boolean and a map containing marked out pieces in the pattern, pieces are marked by the fact they have a ‘:[regular expression]’ in their definition
 
         pattern   = `/name/{id:[\d+]}`
+        //or pattern   = `/name/:id` to match anything
         r := CreateClassic(pattern)
 
         state, param := r.Validate(`/name/12`, false)
@@ -45,7 +46,7 @@ These struct encapsulates the classic pattern and provides the pattern and param
         where:
             param contains the key points extracted according to the piece and its regular expression sections
             state is a boolean stating if it passed/true or failed/false
-            
+
 
 ####FunctionalMatchMux
 These struct encapsulates the mapped pattern and provides the pattern and parameter extracting features
@@ -55,7 +56,7 @@ These struct encapsulates the mapped pattern and provides the pattern and parame
 
 - FunctionalMatchMux.Validate(pattern string,beStrictOnLength bool) (bool,map)
         This member function takes the pattern to match against and a bool value to indicate if should be strict on the length of the patterns to be matched.It returns a boolean and a map containing marked out pieces in the pattern, pieces are marked by the fact they value functions to validate them in the pattern map
-            
+
         pattern   = `/name/id`
         validators = MapFunc{
                 "id": func(i interface{}) bool {

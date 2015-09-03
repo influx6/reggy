@@ -1,7 +1,6 @@
 package reggy
 
 import (
-	"log"
 	"regexp"
 	"testing"
 )
@@ -45,8 +44,6 @@ func TestClassicMuxPicker(t *testing.T) {
 
 	state, param := r.Validate(`/name/12`, false)
 
-	log.Printf("param: %+s", param)
-
 	if !state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)
 	}
@@ -62,8 +59,6 @@ func TestClassicMux(t *testing.T) {
 	}
 
 	state, param := r.Validate(`/name/12`, false)
-
-	log.Printf("param: %+s", param)
 
 	if !state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)
