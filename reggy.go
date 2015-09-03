@@ -1,6 +1,9 @@
 package reggy
 
-import "regexp"
+import (
+	"regexp"
+	"strings"
+)
 
 /*
 pattern: /name/{id:[/\d+/]}/log/{date:[/\w+\W+/]}
@@ -97,15 +100,16 @@ func CreateFunctional(pattern string, f MapFunc) *FunctionalMatchMux {
 // Validate validates if a string matches the pattern and returns the parameter parts
 func (m *FunctionalMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
 	var state bool
-	src := splitPattern(cleanPath(f))
-	param := make(MapGeneric)
+	src := splitPattern(strings.TrimSuffix(cleanPath(f), "/"))
 
 	if !!strictlen {
 		if len(src) != len(m.Pix) {
 			state = false
-			return state, param
+			return state, nil
 		}
 	}
+
+	param := make(MapGeneric)
 
 	for k, v := range m.Pix {
 		if v.Validate(src[k]) {
@@ -138,17 +142,14 @@ func CreateClassic(pattern string) *ClassicMatchMux {
 // Validate validates if a string matches the pattern and returns the parameter parts
 func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
 	var state bool
-	src := splitPattern(cleanPath(f))
+	src := splitPattern(strings.TrimSuffix(cleanPath(f), "/"))
+
+	rem := src[0:]
+
 	param := make(MapGeneric)
 
-	if !!strictlen {
-		if len(src) != len(m.Pix) {
-			state = false
-			return state, param
-		}
-	}
-
 	for k, v := range m.Pix {
+		rem = rem[k:]
 		if v.Validate(src[k]) {
 			if v.param {
 				param[v.original] = src[k]
@@ -158,6 +159,13 @@ func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) 
 		} else {
 			state = false
 			break
+		}
+	}
+
+	if state && strictlen {
+		if len(rem) != 0 {
+			param = nil
+			return false, nil
 		}
 	}
 

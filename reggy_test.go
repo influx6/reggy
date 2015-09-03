@@ -5,6 +5,19 @@ import (
 	"testing"
 )
 
+func TestPriority(t *testing.T) {
+	if CheckPriority(`/admin/id`) != 0 {
+		t.Fatal(`/admin/id priority is not 2`)
+	}
+	if CheckPriority(`/admin/:id`) != 2 {
+		t.Fatal(`/admin/:id priority is not 2`)
+	}
+
+	if CheckPriority(`/admin/{id:[\d+]}/:name`) != 1 {
+		t.Fatal(`/admin/:id priority is not 1`)
+	}
+}
+
 func TestPicker(t *testing.T) {
 	if HasPick(`id`) {
 		t.Fatal(`/admin/id has no picker`)
@@ -61,7 +74,8 @@ func TestClassicMux(t *testing.T) {
 		t.Fatalf("invalid array: %+s", r)
 	}
 
-	state, param := r.Validate(`/name/12`, false)
+	state, param := r.Validate(`/name/12/`, true)
+	// log.Printf("Match: %t %+s", state, param)
 
 	if !state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)
