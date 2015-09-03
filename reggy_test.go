@@ -1,7 +1,7 @@
 package reggy
 
 import (
-	"regexp"
+	"log"
 	"testing"
 )
 
@@ -15,6 +15,15 @@ func TestPriority(t *testing.T) {
 
 	if CheckPriority(`/admin/{id:[\d+]}/:name`) != 1 {
 		t.Fatal(`/admin/:id priority is not 1`)
+	}
+}
+
+func TestEndless(t *testing.T) {
+	if !IsEndless(`/admin/id/*`) {
+		t.Fatal(`/admin/id/* is not endless`)
+	}
+	if !IsEndless(`/admin/id*`) {
+		t.Fatal(`/admin/id* is not endless`)
 	}
 }
 
@@ -58,7 +67,7 @@ func TestClassicMuxPicker(t *testing.T) {
 		t.Fatalf("invalid array: %+s", r)
 	}
 
-	state, param := r.Validate(`/name/12`, false)
+	state, param := r.Validate(`/name/12`)
 
 	if !state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)
@@ -67,42 +76,15 @@ func TestClassicMuxPicker(t *testing.T) {
 }
 
 func TestClassicMux(t *testing.T) {
-	cpattern := `/name/{id:[\d+]}`
+	cpattern := `/name/{id:[\d+]}/`
 	r := CreateClassic(cpattern)
 
 	if r == nil {
 		t.Fatalf("invalid array: %+s", r)
 	}
 
-	state, param := r.Validate(`/name/12/`, true)
-	// log.Printf("Match: %t %+s", state, param)
-
-	if !state {
-		t.Fatalf("incorrect pattern: %+s %t", param, state)
-	}
-
-}
-
-func TestFunctionalMux(t *testing.T) {
-	npattern := `/name/id`
-	numbOnly := regexp.MustCompile(`\d+`)
-	validators := MapFunc{
-		"id": func(i interface{}) bool {
-			rs := i.(string)
-			if numbOnly.MatchString(rs) {
-				return true
-			}
-			return false
-		},
-	}
-
-	r := CreateFunctional(npattern, validators)
-
-	if r == nil {
-		t.Fatalf("invalid array: %+s", r)
-	}
-
-	state, param := r.Validate(`/name/2`, false)
+	state, param := r.Validate(`/name/12/d`)
+	log.Printf("Match: %t %+s", state, param)
 
 	if !state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)

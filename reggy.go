@@ -21,135 +21,35 @@ type Matchable interface {
 	validatePattern(n string)
 }
 
-// BoolFunc defines a function that returns a bool
-type BoolFunc func(i interface{}) bool
-
-// MapFunc defines a map of boolean returning functions
-type MapFunc map[string]BoolFunc
-
-// FunctionalList defines a list of FunctionalMatchers
-type FunctionalList []*FunctionalMatcher
-
-// FunctionalMatcher defines a piece of a functional match
-type FunctionalMatcher struct {
-	Fn       func(n interface{}) bool
-	original string
-	param    bool
-}
-
-//MappedPattern returns a list of FunctionalMatcher
-func MappedPattern(pattern string, f MapFunc) []*FunctionalMatcher {
-	src := splitPattern(pattern)
-	ms := make(FunctionalList, len(src))
-	for k, val := range src {
-		if fn, ok := f[val]; ok {
-			if ok {
-				ms[k] = GenerateFunctionalMatcher(val, fn)
-			} else {
-				ms[k] = GenerateFunctionalMatcher(val, nil)
-			}
-		} else {
-			ms[k] = GenerateFunctionalMatcher(val, nil)
-		}
-	}
-
-	return ms
-}
-
-//GenerateFunctionalMatcher returns a FunctionalMatcher
-func GenerateFunctionalMatcher(val string, fn func(data interface{}) bool) *FunctionalMatcher {
-	if fn == nil {
-		return &FunctionalMatcher{
-			func(i interface{}) bool {
-				return i == val
-			},
-			val,
-			false,
-		}
-	}
-
-	return &FunctionalMatcher{
-		fn,
-		val,
-		true,
-	}
-}
-
-// String returns the original value
-func (f *FunctionalMatcher) String() string {
-	return f.original
-}
-
-// Validate checks the value against the function
-func (f *FunctionalMatcher) Validate(i interface{}) bool {
-	return f.Fn(i)
-}
-
-// FunctionalMatchMux provides a map like validator matcher
-type FunctionalMatchMux struct {
-	Pattern string
-	Pix     FunctionalList
-}
-
-// CreateFunctional returns a new FunctionalMatchMux
-func CreateFunctional(pattern string, f MapFunc) *FunctionalMatchMux {
-	pm := MappedPattern(pattern, f)
-	return &FunctionalMatchMux{pattern, pm}
-}
-
-// Validate validates if a string matches the pattern and returns the parameter parts
-func (m *FunctionalMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
-	var state bool
-	src := splitPattern(strings.TrimSuffix(cleanPath(f), "/"))
-
-	if !!strictlen {
-		if len(src) != len(m.Pix) {
-			state = false
-			return state, nil
-		}
-	}
-
-	param := make(MapGeneric)
-
-	for k, v := range m.Pix {
-		if v.Validate(src[k]) {
-			if v.param {
-				param[v.original] = src[k]
-			}
-			state = true
-			continue
-		} else {
-			state = false
-			break
-		}
-	}
-
-	return state, param
-}
-
 //ClassicMatchMux provides a class array-path matcher
 type ClassicMatchMux struct {
 	Pattern string
-	Pix     ClassicList
+	pix     ClassicList
+	endless bool
 }
 
 // CreateClassic returns a new ClassicMatchMux
 func CreateClassic(pattern string) *ClassicMatchMux {
-	pm := ClassicPattern(pattern)
-	return &ClassicMatchMux{pattern, pm}
+	pm := ClassicPattern(stripLastSlash(pattern))
+	return &ClassicMatchMux{pattern, pm, IsEndless(pattern)}
 }
 
 // Validate validates if a string matches the pattern and returns the parameter parts
-func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) {
+func (m *ClassicMatchMux) Validate(f string) (bool, MapGeneric) {
 	var state bool
-	src := splitPattern(strings.TrimSuffix(cleanPath(f), "/"))
+	cleaned := strings.TrimSuffix(cleanPath(f), "/")
+	src := splitPattern(cleaned)
 
-	rem := src[0:]
+	total := len(m.pix)
+	srclen := len(src)
+
+	if !m.endless && (total < srclen || total > srclen) {
+		return false, nil
+	}
 
 	param := make(MapGeneric)
 
-	for k, v := range m.Pix {
-		rem = rem[k:]
+	for k, v := range m.pix {
 		if v.Validate(src[k]) {
 			if v.param {
 				param[v.original] = src[k]
@@ -159,13 +59,6 @@ func (m *ClassicMatchMux) Validate(f string, strictlen bool) (bool, MapGeneric) 
 		} else {
 			state = false
 			break
-		}
-	}
-
-	if state && strictlen {
-		if len(rem) != 0 {
-			param = nil
-			return false, nil
 		}
 	}
 

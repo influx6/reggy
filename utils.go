@@ -14,10 +14,16 @@ var (
 	special     = regexp.MustCompile(`{\w+:[\w\W]+}|:[\w]+`)
 	morespecial = regexp.MustCompile(`{\w+:[\w\W]+}`)
 	anyvalue    = `[\w\W]+`
+	endless     = regexp.MustCompile(`/\*$`)
 
 	//MoreSlashes this to check for more than one forward slahes
 	MoreSlashes = regexp.MustCompile(`/+`)
 )
+
+//IsEndless returns true/false if the pattern as a /*
+func IsEndless(s string) bool {
+	return endless.MatchString(s)
+}
 
 //RemoveCurly removes '{' and '}' from any string
 func RemoveCurly(s string) string {
@@ -56,6 +62,12 @@ func CheckPriority(patt string) int {
 	return 0
 }
 
+//cleanPattern cleans any /* * pattern found
+func cleanPattern(patt string) string {
+	cleaned := endless.ReplaceAllString(patt, "")
+	return morespecial.ReplaceAllString(cleaned, "/")
+}
+
 // cleanPath returns the canonical path for p, eliminating . and .. elements.
 // Borrowed from the net/http package.
 func cleanPath(p string) string {
@@ -72,6 +84,10 @@ func cleanPath(p string) string {
 		np += "/"
 	}
 	return np
+}
+
+func stripLastSlash(c string) string {
+	return strings.TrimSuffix(strings.TrimSuffix(c, "/*"), "/")
 }
 
 // HasKeyParam returns true/false if the special pattern {:[..]} exists in the string
