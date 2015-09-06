@@ -50,6 +50,11 @@ func (m *ClassicMatchMux) Validate(f string) (bool, MapGeneric) {
 	param := make(MapGeneric)
 
 	for k, v := range m.pix {
+		if k >= srclen {
+			state = false
+			break
+		}
+
 		if v.Validate(src[k]) {
 			if v.param {
 				param[v.original] = src[k]

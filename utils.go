@@ -2,6 +2,7 @@ package reggy
 
 import (
 	"path"
+	"path/filepath"
 	"regexp"
 	"strings"
 )
@@ -23,6 +24,11 @@ var (
 //IsEndless returns true/false if the pattern as a /*
 func IsEndless(s string) bool {
 	return endless.MatchString(s)
+}
+
+// CleanSlashes cleans all double forward slashes into one
+func CleanSlashes(p string) string {
+	return MoreSlashes.ReplaceAllString(filepath.ToSlash(p), "/")
 }
 
 //RemoveCurly removes '{' and '}' from any string
