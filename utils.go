@@ -17,7 +17,7 @@ var (
 	endless     = regexp.MustCompile(`/\*$`)
 
 	//MoreSlashes this to check for more than one forward slahes
-	MoreSlashes = regexp.MustCompile(`/+`)
+	MoreSlashes = regexp.MustCompile(`\/+`)
 )
 
 //IsEndless returns true/false if the pattern as a /*
@@ -38,6 +38,11 @@ func RemoveBracket(s string) string {
 //SplitPattern splits a pattern with the '/'
 func SplitPattern(c string) []string {
 	return strings.Split(c, "/")
+}
+
+//TrimSlashes splits a pattern with the '/'
+func TrimSlashes(c string) string {
+	return strings.TrimSuffix(strings.TrimPrefix(cleanPath(c), "/"), "/")
 }
 
 //SplitPatternAndRemovePrefix splits a pattern with the '/'
@@ -66,6 +71,11 @@ func CheckPriority(patt string) int {
 func cleanPattern(patt string) string {
 	cleaned := endless.ReplaceAllString(patt, "")
 	return morespecial.ReplaceAllString(cleaned, "/")
+}
+
+// CleanPath provides a public path cleaner
+func CleanPath(p string) string {
+	return cleanPath(p)
 }
 
 // cleanPath returns the canonical path for p, eliminating . and .. elements.
