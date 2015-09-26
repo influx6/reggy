@@ -19,7 +19,7 @@ func TestEndless(t *testing.T) {
 	if !IsEndless(`/admin/id/*`) {
 		t.Fatal(`/admin/id/* is not endless`)
 	}
-	if !IsEndless(`/admin/id*`) {
+	if IsEndless(`/admin/id*`) {
 		t.Fatal(`/admin/id* is not endless`)
 	}
 }
