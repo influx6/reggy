@@ -1,9 +1,6 @@
 package reggy
 
-import (
-	"log"
-	"testing"
-)
+import "testing"
 
 func TestPriority(t *testing.T) {
 	if CheckPriority(`/admin/id`) != 0 {
@@ -84,9 +81,8 @@ func TestClassicMux(t *testing.T) {
 	}
 
 	state, param := r.Validate(`/name/12/d`)
-	log.Printf("Match: %t %+s", state, param)
 
-	if !state {
+	if state {
 		t.Fatalf("incorrect pattern: %+s %t", param, state)
 	}
 
