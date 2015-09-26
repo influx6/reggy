@@ -1,4 +1,7 @@
 #Reggy
+[![GoDoc](http://img.shields.io/badge/go-documentation-blue.svg?style=flat-square)](http://godoc.org/github.com/influx6/reggy)
+[![Travis](https://travis-ci.org/influx6/reggy.svg?branch=master)](https://travis-ci.org/influx6/reggy)
+
 Reggy is a package for creating simple url pattern matchers using two style and provides validation methods that can extract the special paramters from the uri provided in validation. These two styles are the Classic and Mapped pattern.
 
 ##Install
